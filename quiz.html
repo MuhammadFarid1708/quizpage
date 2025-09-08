@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Time!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Tailwind Colors (Optional - for easier management) */
+        :root {
+            --color-primary-indigo: #4F46E5; /* Slightly darker indigo for text */
+            --color-accent-coral: #F87171; /* Vibrant coral for selected options */
+            --color-accent-teal: #20B2AA; /* Strong teal for button */
+            --color-light-border: #E5E7EB; /* Lighter border for options */
+            --color-hover-border: #9CA3AF; /* Medium gray for hover border */
+            --color-bg-light: #F9FAFB; /* Very light background for options */
+            --color-bg-hover: #F3F4F6; /* Slightly darker light background for hover */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Vibrant Gradient Background */
+            background: linear-gradient(135deg, #A7F3D0, #C7D2FE, #FDD6D3); /* Light mint, lavender, soft peach */
+            min-height: 100vh; /* Ensure gradient covers full height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        /* Custom animation for fading in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        /* Quiz Container Enhancements */
+        #quiz-container {
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Stronger, softer shadow */
+            padding: 2rem; /* A bit more padding */
+        }
+
+        /* Custom styles for radio buttons */
+        .custom-radio {
+            display: none; /* Hide the default radio button */
+        }
+        
+        .radio-label {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border-radius: 0.75rem; /* Rounded corners for option labels */
+            background-color: var(--color-bg-light); /* Very light background */
+            border: 2px solid var(--color-light-border); /* Light border */
+        }
+
+        .radio-label:hover {
+            border-color: var(--color-hover-border); /* Bolder border on hover */
+            background-color: var(--color-bg-hover); /* Slightly darker light background on hover */
+        }
+
+        .custom-radio:checked + .radio-label {
+            background-color: var(--color-accent-coral); /* Vibrant coral */
+            border-color: var(--color-accent-coral); /* Match border color */
+            color: white; /* White text for contrast */
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 4px 10px rgba(248, 113, 113, 0.4); /* Coral shadow */
+        }
+
+        .custom-radio:checked + .radio-label .radio-circle::after {
+            transform: scale(1);
+        }
+
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #9CA3AF; /* Darker gray for empty circle */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.2s ease-in-out;
+            background-color: white; /* White inside the circle */
+        }
+
+        .custom-radio:checked + .radio-label .radio-circle {
+             border-color: white; /* White border for selected circle */
+             background-color: white; /* White background for selected circle */
+        }
+
+        .radio-circle::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: var(--color-accent-coral); /* Coral checkmark */
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* Submit Button Styling */
+        #submit-btn {
+            background-color: var(--color-accent-teal); /* Teal button */
+            box-shadow: 0 6px 15px rgba(32, 178, 170, 0.3); /* Teal shadow */
+        }
+        #submit-btn:hover {
+            background-color: #1A938C; /* Darker teal on hover */
+            transform: translateY(-3px) scale(1.02); /* More pronounced hover */
+        }
+
+        /* Results Container Styling */
+        #results-container {
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Stronger, softer shadow */
+            padding: 2rem;
+        }
+        #try-again-btn {
+            background-color: #6B7280; /* Darker gray for try again */
+            box-shadow: 0 6px 15px rgba(107, 114, 128, 0.3);
+        }
+        #try-again-btn:hover {
+            background-color: #4B5563;
+        }
+
+    </style>
+</head>
+<body class="p-4">
+    <main class="w-full max-w-2xl">
+        <div id="quiz-container" class="bg-white transition-all duration-500">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-indigo-800 mb-2">Quiz Time!</h1>
+                <p class="text-gray-600 mt-2">Test your knowledge!</p>
+            </div>
+            <div id="quiz-form" class="space-y-6">
+                </div>
+            <div class="mt-10">
+                <button id="submit-btn" class="w-full text-white font-bold py-4 px-8 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-300 transition-all duration-300 transform">
+                    Submit & See Score
+                </button>
+            </div>
+        </div>
+
+        <div id="results-container" class="hidden bg-white transition-all duration-500">
+             <div class="text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
+                <p id="score" class="text-2xl font-semibold text-indigo-600 mb-6"></p>
+             </div>
+             <div id="results-details" class="space-y-4">
+                 </div>
+             <div class="mt-10">
+                <button id="try-again-btn" class="w-full text-white font-bold py-4 px-8 rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform">
+                    Try Another Round
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is the powerhouse of the cell?",
+                options: ["Nucleus", "Ribosome", "Mitochondrion", "Cell Membrane"],
+                answer: "Mitochondrion"
+            },
+            {
+                question: "What force keeps planets in orbit around the sun?",
+                options: ["Magnetism", "Inertia", "Friction", "Gravity"],
+                answer: "Gravity"
+            },
+            {
+                question: "What is the chemical symbol for gold?",
+                options: ["Ag", "Fe", "Au", "Pb"],
+                answer: "Au"
+            },
+            {
+                question: "Which is the largest ocean on Earth?",
+                options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+                answer: "Pacific Ocean"
+            },
+            {
+                question: "What is the process by which plants make their food using sunlight?",
+                options: ["Respiration", "Photosynthesis", "Transpiration", "Germination"],
+                answer: "Photosynthesis"
+            }
+        ];
+
+        const quizForm = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsDetails = document.getElementById('results-details');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+
+        function loadQuiz() {
+            quizForm.innerHTML = '';
+            quizData.forEach((q, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.className = 'fade-in';
+                questionElement.style.animationDelay = `${index * 100}ms`;
+
+                let optionsHTML = '';
+                q.options.forEach(option => {
+                    optionsHTML += `
+                        <div>
+                            <input type="radio" name="question${index}" value="${option}" id="q${index}o${option}" class="custom-radio">
+                            <label for="q${index}o${option}" class="radio-label flex items-center p-4">
+                                <span class="radio-circle"></span>
+                                <span class="font-medium">${option}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                questionElement.innerHTML = `
+                    <div class="mb-2">
+                        <p class="text-lg font-semibold text-gray-700">${index + 1}. ${q.question}</p>
+                    </div>
+                    <div class="space-y-3">${optionsHTML}</div>
+                `;
+                quizForm.appendChild(questionElement);
+            });
+        }
+
+        function showResults() {
+            let score = 0;
+            resultsDetails.innerHTML = ''; // Clear previous results
+            quizData.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                const userAnswer = selectedOption ? selectedOption.value : null;
+                const isCorrect = userAnswer === q.answer;
+
+                if (isCorrect) score++;
+
+                const resultCard = document.createElement('div');
+                resultCard.className = `p-4 rounded-lg border-l-4 ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`;
+                
+                const icon = isCorrect 
+                    ? `<svg class="w-6 h-6 text-green-600 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                    : `<svg class="w-6 h-6 text-red-600 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+                let resultHTML = `
+                    <div class="flex items-start">
+                        ${icon}
+                        <div>
+                            <p class="font-semibold text-gray-800">${q.question}</p>
+                            <p class="font-medium mt-1 ${isCorrect ? 'text-green-800' : 'text-red-800'}">Your answer: ${userAnswer || 'Not answered'}</p>
+                            ${!isCorrect ? `<p class="font-medium text-gray-600 mt-1">Correct answer: ${q.answer}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                resultCard.innerHTML = resultHTML;
+                resultsDetails.appendChild(resultCard);
+            });
+
+            scoreElement.textContent = `You scored ${score} out of ${quizData.length}!`;
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsContainer.classList.add('fade-in');
+        }
+        
+        submitBtn.addEventListener('click', showResults);
+        tryAgainBtn.addEventListener('click', () => {
+             window.location.reload();
+        });
+
+        loadQuiz();
+    </script>
+</body>
+</html>
